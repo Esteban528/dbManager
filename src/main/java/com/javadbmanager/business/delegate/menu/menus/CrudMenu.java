@@ -1,12 +1,15 @@
 package com.javadbmanager.business.delegate.menu.menus;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.javadbmanager.business.delegate.menu.Menu;
 import com.javadbmanager.business.delegate.menu.MenuManager;
 import com.javadbmanager.business.delegate.menu.MenuType;
 import com.javadbmanager.business.logic.DataService;
 import com.javadbmanager.business.logic.TableManagerService;
+import com.javadbmanager.business.logic.exceptions.BusinessException;
 import com.javadbmanager.presentation.Display;
 import com.javadbmanager.presentation.exceptions.EmptyValueException;
 
@@ -60,7 +63,20 @@ class CrudMenuOptions {
     menu.addOption(1, "Insert data", () -> {
       try {
         selectTable();
-      } catch (EmptyValueException e) {
+        Map<String, String> insertItems = new HashMap<>();
+        Set<String> columns = tableManagerService.getTableProperties().keySet();
+
+        for (String col : columns) {
+          display.sendLog(String.format("Insert value to \033[1m %s \033[0m Type an space for empty value", col));
+          String value = display.scanLine();
+          insertItems.put(col, value);
+        }
+
+        insert(insertItems);
+      } catch (Exception e) {
+        display.sendErrorLog(e.getMessage());
+      } finally {
+        sendToDefaultMenu();
       }
     });
   }
@@ -70,11 +86,24 @@ class CrudMenuOptions {
       display.sendLog("Enter the table name");
       String tableName = display.scanLine();
       menu.setTableName(tableName);
+      tableManagerService.setTableName(tableName);
+      dataService.setTableName(tableName);
     }
   }
 
-  public void insert(String tableName, Map<String, String> items) {
-
+  void insert(Map<String, String> items) throws EmptyValueException {
+    if (items.isEmpty()) {
+      throw new EmptyValueException("The elements to be inserted are empty");
+    }
+    try {
+      dataService.insert(items);
+    } catch (BusinessException e) {
+      display.sendErrorLog(e.getMessage());
+      sendToDefaultMenu();
+    }
   }
 
+  void sendToDefaultMenu() {
+    menuManager.load(MenuType.CrudManager);
+  }
 }
