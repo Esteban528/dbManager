@@ -16,6 +16,7 @@ import com.javadbmanager.presentation.exceptions.EmptyValueException;
 public class CrudMenu extends Menu {
   private CrudMenuOptions options;
   private String tableName = null;
+  public final static String DEFAULT_TABLE_NAME = "NOT SELECTED";
 
   public CrudMenu(Display display, MenuManager menuManager, DataService dataService,
       TableManagerService tableManagerService) {
@@ -23,13 +24,14 @@ public class CrudMenu extends Menu {
     super("Crud Menu", "Option for data management (TABLE NOT SELECTED)", MenuType.CrudManager, display,
         menuManager);
 
-    this.tableName = "NOT SELECTED";
+    this.tableName = DEFAULT_TABLE_NAME;
     options = new CrudMenuOptions(this, display, menuManager, dataService, tableManagerService);
     loadOptions();
 
   }
 
   private void loadOptions() {
+    options.selectTableOption();
     options.insertOption();
   }
 
@@ -59,8 +61,19 @@ class CrudMenuOptions {
     this.tableManagerService = tableManagerService;
   }
 
+  public void selectTableOption() {
+    menu.addOption(1, "Select a table", () -> {
+      try {
+        selectTable();
+      } catch (EmptyValueException e) {
+        display.sendErrorLog(e.getMessage());
+        sendToDefaultMenu();
+      }
+    });
+  }
+
   public void insertOption() {
-    menu.addOption(1, "Insert data", () -> {
+    menu.addOption(2, "Insert data", () -> {
       try {
         selectTable();
         Map<String, String> insertItems = new HashMap<>();
@@ -82,7 +95,7 @@ class CrudMenuOptions {
   }
 
   public void selectTable() throws EmptyValueException {
-    if (menu.getTableName() == null) {
+    if (menu.getTableName().equals(CrudMenu.DEFAULT_TABLE_NAME)) {
       display.sendLog("Enter the table name");
       String tableName = display.scanLine();
       menu.setTableName(tableName);
