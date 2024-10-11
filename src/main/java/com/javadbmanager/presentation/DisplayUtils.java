@@ -39,6 +39,10 @@ public class DisplayUtils {
   public static Map<String, String> parseMessageToMap(String message) {
     message.trim();
     String[] values = message.split("=");
+    if (message.isBlank() || message.isEmpty() || values.length <= 1) {
+      return Map.of();
+    }
+
     return Map.of(values[0], values[1]);
   }
 }
