@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.*;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -15,6 +17,7 @@ import com.javadbmanager.business.delegate.menu.MenuManagerImpl;
 import com.javadbmanager.business.delegate.menu.menus.CrudMenu;
 import com.javadbmanager.business.logic.DataService;
 import com.javadbmanager.business.logic.TableManagerService;
+import com.javadbmanager.business.logic.exceptions.BusinessException;
 import com.javadbmanager.presentation.DisplayCLI;
 
 public class CrudMenuTest {
@@ -37,9 +40,6 @@ public class CrudMenuTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
-
-    // crudMenu = new CrudMenu(display, menuManager, dataService,
-    // tableManagerService);
   }
 
   @Test
@@ -60,4 +60,26 @@ public class CrudMenuTest {
     verify(tableManagerService).setTableName(tableName);
     verify(dataService).setTableName(tableName);
   }
+
+  @Test
+  void insertTest() throws BusinessException {
+    String tableName = "users";
+    String column = "name";
+    String value = "estebandev";
+
+    // Table
+    when(display.scanLine())
+        .thenReturn(tableName);
+
+    // Column
+    when(tableManagerService.getTableProperties()).thenReturn(Map.of(column, "test"));
+
+    // Value
+    when(display.scanLine())
+        .thenReturn(value);
+
+    crudMenu.executeOption(2);
+    verify(dataService).insert(Map.of(column, value));
+  }
+
 }
