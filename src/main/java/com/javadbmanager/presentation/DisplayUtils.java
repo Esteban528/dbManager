@@ -1,6 +1,7 @@
 package com.javadbmanager.presentation;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class DisplayUtils {
   public static final String os = System.getProperty("os.name").toLowerCase();;
@@ -33,5 +34,11 @@ public class DisplayUtils {
       e.printStackTrace();
     }
     return width;
+  }
+
+  public static Map<String, String> parseMessageToMap(String message) {
+    message.trim();
+    String[] values = message.split("=");
+    return Map.of(values[0], values[1]);
   }
 }
