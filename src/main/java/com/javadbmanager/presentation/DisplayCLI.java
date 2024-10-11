@@ -15,7 +15,7 @@ public class DisplayCLI implements Display {
 
   public DisplayCLI() {
     this.scanner = new Scanner(System.in);
-    CLI_SIZE = TerminalUtils.getWidth();
+    CLI_SIZE = DisplayUtils.getWidth();
     if (CLI_SIZE % 2 != 0) {
       CLI_SIZE--;
     }

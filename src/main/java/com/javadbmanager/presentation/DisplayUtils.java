@@ -2,7 +2,7 @@ package com.javadbmanager.presentation;
 
 import java.io.IOException;
 
-public class TerminalUtils {
+public class DisplayUtils {
   public static final String os = System.getProperty("os.name").toLowerCase();;
 
   public static int getWidth() {
