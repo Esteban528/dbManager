@@ -86,7 +86,7 @@ class CrudMenuOptions {
         }
 
         insert(insertItems);
-      } catch (Exception e) {
+      } catch (BusinessException | EmptyValueException e) {
         display.sendErrorLog(e.getMessage());
       } finally {
         sendToDefaultMenu();
