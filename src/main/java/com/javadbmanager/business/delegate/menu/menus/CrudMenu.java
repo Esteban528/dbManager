@@ -1,6 +1,7 @@
 package com.javadbmanager.business.delegate.menu.menus;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import com.javadbmanager.business.logic.DataService;
 import com.javadbmanager.business.logic.TableManagerService;
 import com.javadbmanager.business.logic.exceptions.BusinessException;
 import com.javadbmanager.presentation.Display;
+import com.javadbmanager.presentation.DisplayUtils;
 import com.javadbmanager.presentation.exceptions.EmptyValueException;
 
 public class CrudMenu extends Menu {
@@ -33,6 +35,7 @@ public class CrudMenu extends Menu {
   private void loadOptions() {
     options.selectTableOption();
     options.insertOption();
+    options.getDataOption();
   }
 
   public String getTableName() {
@@ -92,6 +95,34 @@ class CrudMenuOptions {
         sendToDefaultMenu();
       }
     });
+  }
+
+  public void getDataOption() {
+    menu.addOption(3, "Select data", () -> {
+      try {
+        selectTable();
+        display.sendLog("Write the filter in the form (id=2)");
+        String filter = display.scanLine();
+        Map<String, String> filterMap = DisplayUtils.parseMessageToMap(filter);
+        showData(filterMap);
+      } catch (EmptyValueException | BusinessException e) {
+        display.sendErrorLog(e.getMessage());
+      } finally {
+        sendToDefaultMenu();
+      }
+    });
+  }
+
+  public void showData(Map<String, String> filterMap) throws BusinessException {
+    List<Map<String, String>> items = (filterMap.isEmpty()) ? dataService.get() : dataService.get(filterMap);
+
+    items.forEach(item -> {
+      item.keySet().forEach(key -> {
+        String message = String.format("%s = %s", key, item.get(key));
+        display.addLog(message);
+      });
+    });
+    display.show();
   }
 
   public void selectTable() throws EmptyValueException {
