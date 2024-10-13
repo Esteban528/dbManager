@@ -147,4 +147,17 @@ public class CrudMenuTest {
     crudMenu.executeOption(4);
     verify(dataService).update(map, filter);
   }
+
+  @Test
+  void deleteTest() throws BusinessException {
+    String tableName = "users";
+    var filter = Map.of("id", "6");
+
+    when(display.scanLine())
+        .thenReturn(tableName)
+        .thenReturn("id=6");
+
+    crudMenu.executeOption(5);
+    verify(dataService).delete(filter);
+  }
 }

@@ -37,6 +37,7 @@ public class CrudMenu extends Menu {
     options.insertOption();
     options.getDataOption();
     options.updateOption();
+    options.deleteOption();
   }
 
   public String getTableName() {
@@ -144,6 +145,28 @@ class CrudMenuOptions {
         sendToDefaultMenu();
       }
     });
+  }
+
+  public void deleteOption() {
+    menu.addOption(5, "Delete data", () -> {
+      try {
+        selectTable();
+
+        display.sendLog("Delete data: ");
+        display.sendLog("Write the where in the form (id=5)");
+        String filter = display.scanLine();
+        Map<String, String> filterMap = DisplayUtils.parseMessageToMap(filter);
+        delete(filterMap);
+      } catch (EmptyValueException | BusinessException e) {
+        display.sendErrorLog(e.getMessage());
+      } finally {
+        sendToDefaultMenu();
+      }
+    });
+  }
+
+  private void delete(Map<String, String> where) throws BusinessException {
+    dataService.delete(where);
   }
 
   private void updateData(Map<String, String> items, Map<String, String> wheres) throws BusinessException {
