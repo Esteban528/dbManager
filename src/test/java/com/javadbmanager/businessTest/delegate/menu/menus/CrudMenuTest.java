@@ -127,4 +127,24 @@ public class CrudMenuTest {
     crudMenu.executeOption(3);
     verify(dataService).get(filter);
   }
+
+  @Test
+  void updateTest() throws BusinessException {
+    String tableName = "users";
+    String column = "name";
+    String value = "Carlos";
+    Map<String, String> map = Map.of(column, value);
+    var filter = Map.of("id", "6");
+
+    when(display.scanLine())
+        .thenReturn(tableName)
+        .thenReturn(value)
+        .thenReturn("id=6");
+
+    // Column
+    when(tableManagerService.getTableProperties()).thenReturn(Map.of(column, "6"));
+
+    crudMenu.executeOption(4);
+    verify(dataService).update(map, filter);
+  }
 }

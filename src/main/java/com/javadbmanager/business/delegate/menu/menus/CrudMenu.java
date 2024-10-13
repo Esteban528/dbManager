@@ -36,6 +36,7 @@ public class CrudMenu extends Menu {
     options.selectTableOption();
     options.insertOption();
     options.getDataOption();
+    options.updateOption();
   }
 
   public String getTableName() {
@@ -111,6 +112,42 @@ class CrudMenuOptions {
         sendToDefaultMenu();
       }
     });
+  }
+
+  public void updateOption() {
+    menu.addOption(4, "Update data", () -> {
+      try {
+        selectTable();
+
+        Map<String, String> updateItems = new HashMap<>();
+        Set<String> columns = tableManagerService.getTableProperties().keySet();
+
+        display.sendLog("Update data: ");
+        for (String column : columns) {
+          String message = String.format("Update %s", column);
+          display.sendLog(message);
+          String value = display.scanLine();
+
+          if (!value.isBlank() && !value.isEmpty()) {
+            updateItems.put(column, value);
+          }
+        }
+
+        display.sendLog("Write the Where in the form (id=5)");
+        String filter = display.scanLine();
+        Map<String, String> filterMap = DisplayUtils.parseMessageToMap(filter);
+        updateData(updateItems, filterMap);
+
+      } catch (EmptyValueException | BusinessException e) {
+        display.sendErrorLog(e.getMessage());
+      } finally {
+        sendToDefaultMenu();
+      }
+    });
+  }
+
+  private void updateData(Map<String, String> items, Map<String, String> wheres) throws BusinessException {
+    dataService.update(items, wheres);
   }
 
   public void showData(Map<String, String> filterMap) throws BusinessException {
