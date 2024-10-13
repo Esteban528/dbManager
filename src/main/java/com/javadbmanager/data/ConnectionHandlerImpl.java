@@ -29,7 +29,7 @@ public class ConnectionHandlerImpl implements ConnectionHandler {
     }
 
     this.connection = getDataSource(connectionBean, dataUtils.makeUrl(connectionBean)).getConnection();
-    this.connection.setAutoCommit(false);
+    // this.connection.setAutoCommit(false);
   }
 
   public DataSource getDataSource(ConnectionBean connectionBean, String url) throws SQLException {
