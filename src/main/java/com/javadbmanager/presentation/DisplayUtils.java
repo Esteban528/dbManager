@@ -1,8 +1,9 @@
 package com.javadbmanager.presentation;
 
 import java.io.IOException;
+import java.util.Map;
 
-public class TerminalUtils {
+public class DisplayUtils {
   public static final String os = System.getProperty("os.name").toLowerCase();;
 
   public static int getWidth() {
@@ -33,5 +34,15 @@ public class TerminalUtils {
       e.printStackTrace();
     }
     return width;
+  }
+
+  public static Map<String, String> parseMessageToMap(String message) {
+    message.trim();
+    String[] values = message.split("=");
+    if (message.isBlank() || message.isEmpty() || values.length <= 1) {
+      return Map.of();
+    }
+
+    return Map.of(values[0], values[1]);
   }
 }
