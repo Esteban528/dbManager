@@ -15,7 +15,7 @@ public interface MenuManager {
 
   void removeMenu(MenuType key);
 
-  Map<MenuType, Menu> getMenuList();
+  Map<MenuType, Menu> getMenuMap();
 
   void load(MenuType menuType) throws MenuException;
 }

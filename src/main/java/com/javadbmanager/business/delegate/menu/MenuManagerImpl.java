@@ -1,7 +1,6 @@
 package com.javadbmanager.business.delegate.menu;
 
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.javadbmanager.business.delegate.menu.exceptions.MenuException;
@@ -22,8 +21,8 @@ public class MenuManagerImpl implements MenuManager {
 
   @Override
   public void setCurrentMenu(MenuType key) {
-    this.currentMenu = getMenuList().get(key);
-    this.currentMenuType = getMenuList().get(key).getMenuType();
+    this.currentMenu = getMenuMap().get(key);
+    this.currentMenuType = getMenuMap().get(key).getMenuType();
   }
 
   @Override
@@ -47,35 +46,40 @@ public class MenuManagerImpl implements MenuManager {
   }
 
   @Override
-  public Map<MenuType, Menu> getMenuList() {
+  public Map<MenuType, Menu> getMenuMap() {
     return this.menuMap;
   }
 
   @Override
   public void load(MenuType menuType) throws MenuException {
-    if (getCurrentMenuType() == MenuType.EmptyMenu || (getCurrentMenu() != null && !getCurrentMenu().isBusy())) {
+    if (getCurrentMenuType() == MenuType.EmptyMenu || (!getCurrentMenu().isBusy())) {
       display.clean();
 
       setCurrentMenu(menuType);
 
       Menu menu = menuMap.get(menuType);
       Map<Integer, CommandHandler> options = menu.getOptions();
-
-      Iterator<Integer> iterator = options.keySet().iterator();
-      while (iterator.hasNext()) {
-        int key = 1;
+      display.sendLog(menu.getTitle());
+      if (menuType != MenuType.MainMenu)
+        display.sendLog("0. Main menu");
+      options.keySet().forEach(key -> {
         CommandHandler commandHandler = options.get(key);
-        display.addLog(String.format("%d. %s", key, commandHandler.getTitle()));
-      }
-      display.show();
+        display.sendLog(String.format("%d. %s", key, commandHandler.getTitle()));
+      });
 
       try {
+        display.sendLog("Select an option. (Only number)");
+
         int option = display.scan();
+        display.sendLog("You've been select " + option);
 
-        options.get(option).execute();
-
+        if (option == 0)
+          load(MenuType.MainMenu);
+        else
+          options.get(option).execute();
       } catch (EmptyValueException e) {
-        load(menuType);
+        // load(menuType);
+        display.sendLog("EmptyValueException");
       }
     } else {
       String message = "The current menu is busy";
