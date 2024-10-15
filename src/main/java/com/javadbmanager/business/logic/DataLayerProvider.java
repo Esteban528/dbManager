@@ -20,4 +20,5 @@ public interface DataLayerProvider {
 
   ConnectionHandler getConnectionHandler();
 
+  void initDataLayer();
 }
