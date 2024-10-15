@@ -17,4 +17,6 @@ public interface TableHandler {
   void renameColumn(String tableName, String columnName, String newName) throws SQLException;
 
   Map<String, String> getTableProperties(String tableName) throws SQLException;
+
+  Map<String, String> getTableColumns(String tableName) throws SQLException;
 }
