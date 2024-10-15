@@ -1,20 +1,30 @@
 package com.javadbmanager.presentation;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.javadbmanager.presentation.exceptions.EmptyValueException;
 
 public class DisplayCLI implements Display {
-  private ArrayList<Message> logs = new ArrayList<>();
-  private Scanner scanner;
+  private Set<Message> logs = new LinkedHashSet<>();
+  // private List<Message> logs = new ArrayList<>();
+  // private Scanner scanner;
   private int CLI_SIZE = 100;
   private final char BORDER_CHAR = '*';
   private final char SPACE_CHAR = ' ';
+  private BufferedReader reader;
 
   public DisplayCLI() {
-    this.scanner = new Scanner(System.in);
+    // this.scanner = new Scanner(System.in);
+
+    this.reader = new BufferedReader(new InputStreamReader(System.in));
     CLI_SIZE = DisplayUtils.getWidth();
     if (CLI_SIZE % 2 != 0) {
       CLI_SIZE--;
@@ -50,55 +60,66 @@ public class DisplayCLI implements Display {
   }
 
   public int scan() throws EmptyValueException {
-    int option;
-    try {
-      option = this.scanner.nextInt();
-    } catch (Exception e) {
+    String line = scanLine();
+    if (line.isBlank())
       throw new EmptyValueException();
-    }
 
-    return option;
+    return Integer.parseInt(line);
   }
 
-  public double scanDouble() {
-    double option;
-    try {
-      option = this.scanner.nextDouble();
-    } catch (Exception e) {
-      option = 0.0;
-    }
+  public double scanDouble() throws EmptyValueException {
+    String line = scanLine();
+    if (line.isBlank())
+      throw new EmptyValueException();
 
-    return option;
+    return Double.parseDouble(line);
   }
 
   public String scanLine() {
-    String option = this.scanner.nextLine();
-    return option;
+    try {
+      var value = reader.readLine();
+      System.out.println(value);
+      return value;
+    } catch (IOException e) {
+      System.err.println("Read line error: " + e.getMessage());
+      return "";
+    }
+  }
+
+  public void close() {
+    try {
+      reader.close();
+    } catch (IOException e) {
+      System.err.println("Close reader error: " + e.getMessage());
+    }
   }
 
   public void show() {
     cleanTerminal();
 
-    printBorder();
-    printEmptyLine();
+    // printBorder();
+    // printEmptyLine();
 
-    for (Message log : logs) {
+    this.logs.forEach(log -> {
       int alives = log.getAlives();
-      log.setAlives(--alives);
-      if (alives >= 0) {
-        printCentered(log.getMessage());
-      }
-      if (alives <= 0) {
-        logs.remove(log);
-      }
-    }
 
-    printEmptyLine();
-    printBorder();
+      if (alives >= 1) {
+        // printCentered(log.getMessage());
+        System.out.println(log.getMessage());
+      }
+
+      // if (alives <= 0) {
+      // logs.remove(log);
+      // }
+
+      // log.setAlives(alives--);
+    });
+    // printEmptyLine();
+    // printBorder();
   }
 
   public void clean() {
-
+    logs.clear();
   }
 
   public void cleanTerminal() {
