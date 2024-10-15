@@ -8,15 +8,24 @@ import com.javadbmanager.business.logic.exceptions.BusinessException;
 import com.javadbmanager.data.AnyRepository;
 import com.javadbmanager.data.ConnectionHandler;
 import com.javadbmanager.data.exceptions.ColumnNotFoundException;
+import com.javadbmanager.data.utils.DataUtils;
 
 public class DataServiceImpl implements DataService {
-  private final ConnectionHandler connectionHandler;
-  private final AnyRepository anyRepository;
+  private ConnectionHandler connectionHandler;
+  private AnyRepository anyRepository;
+  private DataUtils dataUtils;
+  private final DataLayerProvider dataLayerProvider;
   private String tableName;
 
   public DataServiceImpl(DataLayerProvider dataLayerProvider) {
+    this.dataLayerProvider = dataLayerProvider;
+  }
+
+  @Override
+  public void init() {
     this.connectionHandler = dataLayerProvider.getConnectionHandler();
     this.anyRepository = dataLayerProvider.getAnyRepository();
+    this.dataUtils = dataLayerProvider.getDataUtils();
   }
 
   public ConnectionHandler getConnectionHandler() {
@@ -30,6 +39,7 @@ public class DataServiceImpl implements DataService {
   @Override
   public void setTableName(String tableName) {
     this.tableName = tableName;
+    anyRepository.setTableName(tableName, dataUtils);
   }
 
   @Override

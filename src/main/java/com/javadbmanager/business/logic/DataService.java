@@ -28,4 +28,6 @@ public interface DataService {
   void commitAndClose() throws BusinessException;
 
   AnyRepository getAnyRepository();
+
+  void init();
 }
