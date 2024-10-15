@@ -72,6 +72,7 @@ class CrudMenuOptions {
         selectTable();
       } catch (EmptyValueException e) {
         display.sendErrorLog(e.getMessage());
+      } finally {
         sendToDefaultMenu();
       }
     });
@@ -80,15 +81,18 @@ class CrudMenuOptions {
   public void insertOption() {
     menu.addOption(2, "Insert data", () -> {
       try {
-        selectTable();
         Map<String, String> insertItems = new HashMap<>();
-        Set<String> columns = tableManagerService.getTableProperties().keySet();
+        Map<String, String> columns = tableManagerService.getTableColumns();
+        display.sendLog((columns.isEmpty() ? "Empty" : "Good"));
 
-        for (String col : columns) {
+        columns.forEach((col, data) -> {
           display.sendLog(String.format("Insert value to \033[1m %s \033[0m Type an space for empty value", col));
+
+          // display.sendLog(String.format("%s - - - > %s", col, data));
           String value = display.scanLine();
-          insertItems.put(col, value);
-        }
+          if (!value.isEmpty() && !value.isBlank())
+            insertItems.put(col, value);
+        });
 
         insert(insertItems);
       } catch (BusinessException | EmptyValueException e) {
@@ -102,12 +106,11 @@ class CrudMenuOptions {
   public void getDataOption() {
     menu.addOption(3, "Select data", () -> {
       try {
-        selectTable();
         display.sendLog("Write the filter in the form (id=2)");
         String filter = display.scanLine();
         Map<String, String> filterMap = DisplayUtils.parseMessageToMap(filter);
         showData(filterMap);
-      } catch (EmptyValueException | BusinessException e) {
+      } catch (BusinessException e) {
         display.sendErrorLog(e.getMessage());
       } finally {
         sendToDefaultMenu();
@@ -118,10 +121,8 @@ class CrudMenuOptions {
   public void updateOption() {
     menu.addOption(4, "Update data", () -> {
       try {
-        selectTable();
-
         Map<String, String> updateItems = new HashMap<>();
-        Set<String> columns = tableManagerService.getTableProperties().keySet();
+        Set<String> columns = tableManagerService.getTableColumns().keySet();
 
         display.sendLog("Update data: ");
         for (String column : columns) {
@@ -139,7 +140,7 @@ class CrudMenuOptions {
         Map<String, String> filterMap = DisplayUtils.parseMessageToMap(filter);
         updateData(updateItems, filterMap);
 
-      } catch (EmptyValueException | BusinessException e) {
+      } catch (BusinessException e) {
         display.sendErrorLog(e.getMessage());
       } finally {
         sendToDefaultMenu();
@@ -150,14 +151,13 @@ class CrudMenuOptions {
   public void deleteOption() {
     menu.addOption(5, "Delete data", () -> {
       try {
-        selectTable();
 
         display.sendLog("Delete data: ");
         display.sendLog("Write the where in the form (id=5)");
         String filter = display.scanLine();
         Map<String, String> filterMap = DisplayUtils.parseMessageToMap(filter);
         delete(filterMap);
-      } catch (EmptyValueException | BusinessException e) {
+      } catch (BusinessException e) {
         display.sendErrorLog(e.getMessage());
       } finally {
         sendToDefaultMenu();
@@ -179,6 +179,7 @@ class CrudMenuOptions {
     items.forEach(item -> {
       item.keySet().forEach(key -> {
         String message = String.format("%s = %s", key, item.get(key));
+        display.addLog("- - - - - - - - - - - - - - - - - - - - - - -");
         display.addLog(message);
       });
     });
@@ -186,13 +187,12 @@ class CrudMenuOptions {
   }
 
   public void selectTable() throws EmptyValueException {
-    if (menu.getTableName().equals(CrudMenu.DEFAULT_TABLE_NAME)) {
-      display.sendLog("Enter the table name");
-      String tableName = display.scanLine();
-      menu.setTableName(tableName);
-      tableManagerService.setTableName(tableName);
-      dataService.setTableName(tableName);
-    }
+    display.sendLog("Enter the table name");
+    String tableName = display.scanLine();
+    display.sendSuccessLog(tableName);
+    menu.setTableName(tableName);
+    tableManagerService.setTableName(tableName);
+    dataService.setTableName(tableName);
   }
 
   void insert(Map<String, String> items) throws EmptyValueException {
@@ -208,6 +208,7 @@ class CrudMenuOptions {
   }
 
   void sendToDefaultMenu() {
+    display.scanLine();
     menuManager.load(MenuType.CrudManager);
   }
 }

@@ -78,8 +78,7 @@ public class MenuManagerImpl implements MenuManager {
         else
           options.get(option).execute();
       } catch (EmptyValueException e) {
-        // load(menuType);
-        display.sendLog("EmptyValueException");
+        load(menuType);
       }
     } else {
       String message = "The current menu is busy";
