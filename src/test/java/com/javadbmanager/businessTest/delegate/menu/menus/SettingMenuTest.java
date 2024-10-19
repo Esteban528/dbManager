@@ -17,10 +17,12 @@ import com.javadbmanager.business.delegate.menu.MenuManagerImpl;
 import com.javadbmanager.business.delegate.menu.MenuType;
 import com.javadbmanager.business.delegate.menu.menus.SettingMenu;
 import com.javadbmanager.business.logic.ConnectionBeanBuilder;
+import com.javadbmanager.business.logic.DefaultDataLayerProvider;
 import com.javadbmanager.business.logic.EnvManagerServiceImpl;
 import com.javadbmanager.business.logic.utils.ConnectionUtil;
 import com.javadbmanager.data.ConnectionBean;
 import com.javadbmanager.presentation.DisplayCLI;
+import com.javadbmanager.presentation.exceptions.EmptyValueException;
 
 public class SettingMenuTest {
   SettingMenu settingMenu;
@@ -44,8 +46,11 @@ public class SettingMenuTest {
   ConnectionBean connectionBean;
 
   @BeforeEach
-  void setUp() {
+  void setUp() throws EmptyValueException {
     MockitoAnnotations.openMocks(this);
+
+    SettingMenu settingMenu = new SettingMenu(display, menuManager, connectionBeanBuilder, connectionUtil,
+        envManagerService);
 
     when(connectionBeanBuilder.setHost(anyString())).thenReturn(connectionBeanBuilder);
     when(connectionBeanBuilder.setPort(anyString())).thenReturn(connectionBeanBuilder);
@@ -67,7 +72,9 @@ public class SettingMenuTest {
     when(display.scanDouble())
         .thenReturn(5.0);
 
-    when(envManagerService.get("ConnectionBean")).thenReturn(true);
+    when(menuManager.getMenuMap()).thenReturn(Map.of(MenuType.MainMenu, settingMenu));
+    when(envManagerService.get("ConnectionBean")).thenReturn(new ConnectionBeanBuilder().build());
+    when(envManagerService.get("dataLayerProvider")).thenReturn(new DefaultDataLayerProvider(envManagerService));
   }
 
   @Test

@@ -58,12 +58,8 @@ public class MainMenuTest {
 
   @Test
   void testOptions() {
-
     Map<Integer, CommandHandler> optionMap = mainMenu.getOptions();
     optionMap.get(1).execute();
     verify(menuManager).load(MenuType.Config);
-
-    optionMap.get(2).execute();
-    verify(menuManager).load(MenuType.TableManager);
   }
 }

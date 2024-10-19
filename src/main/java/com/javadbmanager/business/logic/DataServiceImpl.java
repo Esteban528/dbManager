@@ -19,6 +19,8 @@ public class DataServiceImpl implements DataService {
 
   public DataServiceImpl(DataLayerProvider dataLayerProvider) {
     this.dataLayerProvider = dataLayerProvider;
+
+    init();
   }
 
   @Override

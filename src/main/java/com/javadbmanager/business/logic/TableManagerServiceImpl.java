@@ -13,6 +13,7 @@ public class TableManagerServiceImpl implements TableManagerService {
 
   public TableManagerServiceImpl(DataLayerProvider dataLayerProvider) {
     this.dataLayerProvider = dataLayerProvider;
+    init();
   }
 
   public void init() {

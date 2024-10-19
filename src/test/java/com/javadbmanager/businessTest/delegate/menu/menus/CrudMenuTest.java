@@ -73,7 +73,7 @@ public class CrudMenuTest {
         .thenReturn(tableName);
 
     // Column
-    when(tableManagerService.getTableProperties()).thenReturn(Map.of(column, "test"));
+    when(tableManagerService.getTableColumns()).thenReturn(Map.of(column, "test"));
 
     // Value
     when(display.scanLine())
@@ -89,10 +89,6 @@ public class CrudMenuTest {
     String column = "name";
     String value = "estebandev";
     Map<String, String> map = Map.of("id", "5", column, value);
-
-    // Table
-    when(display.scanLine())
-        .thenReturn(tableName);
 
     // Filter
     when(display.scanLine())
@@ -113,10 +109,6 @@ public class CrudMenuTest {
     Map<String, String> map = Map.of("id", "5", column, value);
     var filter = Map.of("id", "5");
 
-    // Table
-    when(display.scanLine())
-        .thenReturn(tableName);
-
     // Filter
     when(display.scanLine())
         .thenReturn("id=5");
@@ -130,19 +122,17 @@ public class CrudMenuTest {
 
   @Test
   void updateTest() throws BusinessException {
-    String tableName = "users";
     String column = "name";
     String value = "Carlos";
     Map<String, String> map = Map.of(column, value);
     var filter = Map.of("id", "6");
 
+    // Column
+    when(tableManagerService.getTableColumns()).thenReturn(Map.of(column, "6"));
+
     when(display.scanLine())
-        .thenReturn(tableName)
         .thenReturn(value)
         .thenReturn("id=6");
-
-    // Column
-    when(tableManagerService.getTableProperties()).thenReturn(Map.of(column, "6"));
 
     crudMenu.executeOption(4);
     verify(dataService).update(map, filter);
@@ -150,11 +140,9 @@ public class CrudMenuTest {
 
   @Test
   void deleteTest() throws BusinessException {
-    String tableName = "users";
     var filter = Map.of("id", "6");
 
     when(display.scanLine())
-        .thenReturn(tableName)
         .thenReturn("id=6");
 
     crudMenu.executeOption(5);

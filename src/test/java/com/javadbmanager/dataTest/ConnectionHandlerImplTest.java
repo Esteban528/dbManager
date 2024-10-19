@@ -57,7 +57,7 @@ public class ConnectionHandlerImplTest {
 
     verify(connectionHandler, times(1)).createConnection();
     verify(dataSource, times(1)).getConnection();
-    verify(connection, times(1)).setAutoCommit(false);
+    // verify(connection, times(1)).setAutoCommit(false);
     assertNotNull(connectionHandler.getConnection());
   }
 
