@@ -31,7 +31,7 @@ public class DisplayUtils {
         width = cols;
       }
     } catch (IOException | InterruptedException e) {
-      e.printStackTrace();
+      // e.printStackTrace();
     }
     return width;
   }
