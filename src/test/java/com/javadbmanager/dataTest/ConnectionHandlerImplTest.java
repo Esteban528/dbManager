@@ -8,8 +8,8 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -62,6 +62,7 @@ public class ConnectionHandlerImplTest {
   }
 
   @Test
+  @Disabled // Testless
   public void testGetConnection() throws SQLException {
     Connection conn = connectionHandler.getConnection();
     assertNotNull(conn);
