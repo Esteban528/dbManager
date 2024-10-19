@@ -19,7 +19,7 @@ public class DataUtilsImpl implements DataUtils {
       properties += "&allowPublicKeyRetrieval=true";
     }
 
-    url = String.format("jdbc:mysql://%s:%d/%s?useSSL=false&%s",
+    url = String.format("jdbc:mysql://%s:%s/%s?useSSL=false&%s",
         connectionBean.getHost(), connectionBean.getPort(), connectionBean.getDatabase(), properties);
 
     return url;

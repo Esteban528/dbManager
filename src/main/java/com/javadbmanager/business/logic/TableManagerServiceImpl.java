@@ -8,10 +8,16 @@ import com.javadbmanager.data.TableHandler;
 
 public class TableManagerServiceImpl implements TableManagerService {
   private String tableName;
-  private final TableHandler tableHandler;
+  private TableHandler tableHandler;
+  private final DataLayerProvider dataLayerProvider;
 
   public TableManagerServiceImpl(DataLayerProvider dataLayerProvider) {
-    tableHandler = dataLayerProvider.getTableHandler();
+    this.dataLayerProvider = dataLayerProvider;
+    init();
+  }
+
+  public void init() {
+    this.tableHandler = dataLayerProvider.getTableHandler();
   }
 
   @Override
@@ -77,9 +83,19 @@ public class TableManagerServiceImpl implements TableManagerService {
       Map<String, String> result = tableHandler.getTableProperties(tableName);
       return result;
     } catch (SQLException e) {
-      e.printStackTrace();
+      // e.printStackTrace();
       throw new BusinessException(e.getMessage(), e);
     }
   }
 
+  @Override
+  public Map<String, String> getTableColumns() throws BusinessException {
+    try {
+      Map<String, String> result = tableHandler.getTableColumns(tableName);
+      return result;
+    } catch (SQLException e) {
+      // e.printStackTrace();
+      throw new BusinessException(e.getMessage(), e);
+    }
+  }
 }

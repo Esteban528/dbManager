@@ -7,6 +7,8 @@ import com.javadbmanager.business.logic.exceptions.BusinessException;
 public interface TableManagerService {
   void setTableName(String tableName);
 
+  void init();
+
   String getTableName();
 
   void create(String tableName, Map<String, String> columns) throws BusinessException;
@@ -20,4 +22,6 @@ public interface TableManagerService {
   void editColumn(String columnName, String... constraints) throws BusinessException;
 
   Map<String, String> getTableProperties() throws BusinessException;
+
+  Map<String, String> getTableColumns() throws BusinessException;
 }

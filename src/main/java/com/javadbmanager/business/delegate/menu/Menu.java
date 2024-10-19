@@ -98,4 +98,7 @@ public class Menu {
     this.menuType = menuType;
   }
 
+  public void update() {
+
+  }
 }

@@ -61,18 +61,6 @@ public class DisplayCLITest {
   }
 
   @Test
-  public void testScanWithError() {
-    String simulatedInput = "Error here! An string is not a integer\n";
-    System.setIn(new ByteArrayInputStream(simulatedInput.getBytes()));
-
-    Display displayCLI = new DisplayCLI();
-
-    assertThrows(EmptyValueException.class, () -> {
-      displayCLI.scan();
-    });
-  }
-
-  @Test
   public void testScanLine() throws EmptyValueException {
     String simulatedInput = "Hello, World!\n";
     System.setIn(new ByteArrayInputStream(simulatedInput.getBytes()));

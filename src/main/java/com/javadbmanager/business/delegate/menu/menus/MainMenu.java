@@ -8,6 +8,7 @@ import com.javadbmanager.business.logic.EnvManagerService;
 import com.javadbmanager.presentation.Display;
 
 public class MainMenu extends Menu {
+  private EnvManagerService envManagerService;
 
   public MainMenu(
       Display display,
@@ -17,17 +18,35 @@ public class MainMenu extends Menu {
 
     super("Main menu", "List of menus", MenuType.MainMenu, display, menuManager);
 
+    this.envManagerService = envManagerService;
+    super.addOption(1,
+        "Configure connection to DataBase", () -> {
+          menuManager.load(MenuType.Config);
+        });
+  }
+
+  @Override
+  public void update() {
+    super.getOptions().clear();
     boolean existsAConnection = (envManagerService.get("ConnectionBean") != null);
 
     super.addOption(1,
-        (existsAConnection ? "Change Connection to Database" : "Connect to DataBase"), () -> {
+        (existsAConnection ? "Change Connection to Database" : "Configure connection to DataBase"), () -> {
           menuManager.load(MenuType.Config);
         });
 
     if (existsAConnection) {
-      super.addOption(2, "Table editor", () -> {
+      super.addOption(2, getMenu(MenuType.TableManager).getTitle(), () -> {
         menuManager.load(MenuType.TableManager);
       });
+
+      super.addOption(3, getMenu(MenuType.CrudManager).getTitle(), () -> {
+        menuManager.load(MenuType.CrudManager);
+      });
     }
+  }
+
+  private Menu getMenu(MenuType menuType) {
+    return menuManager.getMenuMap().get(menuType);
   }
 }

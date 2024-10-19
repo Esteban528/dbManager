@@ -23,14 +23,31 @@ public class DefaultDataLayerProvider implements DataLayerProvider {
   private ConnectionHandler connectionHandler;
   private AnyRepository anyRepository;
   private TableHandler tableHandler;
+  private EnvManagerService envManagerService;
 
-  public DefaultDataLayerProvider(ConnectionBean connectionBean) throws SQLException {
-    dataUtils = new DataUtilsImpl();
-    connectionHandler = new ConnectionHandlerImpl(connectionBean, dataUtils);
-    queryBuilder = new QueryBuilderImpl();
-    dataAccessObject = new DataAccessObjectImpl(connectionHandler.getConnection());
-    tableHandler = new TableHandlerImpl(connectionHandler, queryBuilder);
-    anyRepository = new AnyRepositoryImpl(connectionHandler, queryBuilder, dataAccessObject);
+  public DefaultDataLayerProvider(EnvManagerService envManagerService) {
+    this.envManagerService = envManagerService;
+  }
+
+  public void initDataLayer() {
+    try {
+      dataUtils = new DataUtilsImpl();
+      connectionHandler = new ConnectionHandlerImpl((ConnectionBean) envManagerService.get("ConnectionBean"),
+          dataUtils);
+      queryBuilder = new QueryBuilderImpl();
+      dataAccessObject = new DataAccessObjectImpl(connectionHandler.getConnection());
+      tableHandler = new TableHandlerImpl(connectionHandler, queryBuilder, dataUtils);
+      anyRepository = new AnyRepositoryImpl(connectionHandler, queryBuilder, dataAccessObject);
+
+      TableManagerService tableManagerService = (TableManagerService) envManagerService.get("tableManagerService");
+      tableManagerService.init();
+
+      DataService dataService = (DataService) envManagerService.get("dataService");
+      dataService.init();
+
+    } catch (SQLException e) {
+      System.out.println(e.getCause());
+    }
   }
 
   @Override

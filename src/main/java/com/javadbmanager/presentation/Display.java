@@ -20,11 +20,13 @@ public interface Display {
 
   double scanDouble() throws EmptyValueException;
 
-  String scanLine() throws EmptyValueException;
+  String scanLine();
 
   void show();
 
   List<String> getLogs();
 
   void clean();
+
+  void close();
 }

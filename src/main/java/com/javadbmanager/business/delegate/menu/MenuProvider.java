@@ -1,7 +1,7 @@
 package com.javadbmanager.business.delegate.menu;
 
-import java.util.EnumMap;
+import java.util.List;
 
 public interface MenuProvider {
-  EnumMap<MenuType, Menu> getMenuMap();
+  List<Menu> getMenuMap();
 }

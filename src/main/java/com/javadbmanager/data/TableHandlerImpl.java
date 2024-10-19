@@ -7,15 +7,19 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.javadbmanager.data.utils.DataUtils;
 import com.javadbmanager.data.utils.QueryBuilder;
 
 public class TableHandlerImpl implements TableHandler {
   private DataAccessObject dataAccessObject;
 
   private QueryBuilder queryBuilder;
+  private DataUtils dataUtils;
 
-  public TableHandlerImpl(ConnectionHandler connectionHandler, QueryBuilder queryBuilder) throws SQLException {
+  public TableHandlerImpl(ConnectionHandler connectionHandler, QueryBuilder queryBuilder, DataUtils dataUtils)
+      throws SQLException {
     this(connectionHandler.getConnection(), queryBuilder);
+    this.dataUtils = dataUtils;
   }
 
   public TableHandlerImpl(Connection connection, QueryBuilder queryBuilder) {
@@ -66,7 +70,7 @@ public class TableHandlerImpl implements TableHandler {
     try {
       DatabaseMetaData metaData = dataAccessObject.getMetadata();
 
-      try (ResultSet columns = metaData.getColumns(null, null, tableName, null)) {
+      try (ResultSet columns = metaData.getColumns(null, null, tableName, "%")) {
         while (columns.next()) {
           String columnName = columns.getString("COLUMN_NAME");
           String columnType = columns.getString("TYPE_NAME");
@@ -95,5 +99,10 @@ public class TableHandlerImpl implements TableHandler {
     }
 
     return columnsMap;
+  }
+
+  @Override
+  public Map<String, String> getTableColumns(String tableName) throws SQLException {
+    return dataUtils.getColumnsData(dataAccessObject.getConnection(), tableName);
   }
 }

@@ -4,6 +4,7 @@ import com.javadbmanager.business.delegate.menu.Menu;
 import com.javadbmanager.business.delegate.menu.MenuManager;
 import com.javadbmanager.business.delegate.menu.MenuType;
 import com.javadbmanager.business.logic.ConnectionBeanBuilder;
+import com.javadbmanager.business.logic.DataLayerProvider;
 import com.javadbmanager.business.logic.EnvManagerService;
 import com.javadbmanager.business.logic.utils.ConnectionUtil;
 import com.javadbmanager.presentation.Display;
@@ -25,53 +26,72 @@ public class SettingMenu extends Menu {
   }
 
   private void loadOptions(ConnectionBeanBuilder connectionBeanBuilder, ConnectionUtil connectionUtil) {
-    super.addOption(1, "Connect to DataBase", () -> {
+    super.addOption(1, "Create connection DataBase", () -> {
       try {
-        String host, port, username, password, dbType, database;
-        double dbVersion;
-
-        display.sendLog("hostname: ");
-        host = display.scanLine();
-
-        display.sendLog("port: ");
-        port = display.scanLine();
-
-        display.sendLog("username: ");
-        username = display.scanLine();
-
-        display.sendLog("password: ");
-        password = display.scanLine();
-
-        display.sendLog("Database Type (Default MySql): ");
-        dbType = display.scanLine();
-
-        display.sendLog("Database version (Default 5.0): ");
-        dbVersion = display.scanDouble();
-
-        display.sendLog("Database name: ");
-        database = display.scanLine();
-
-        setBusy(true);
-        connectionBeanBuilder
-            .setHost(host)
-            .setPort(port)
-            .setUsername(username)
-            .setPassword(password)
-            .setDBType(dbType)
-            .setDBVersion(dbVersion)
-            .setDatabase(database);
-
-        display.clean();
-        display.sendLog("Testing connection...");
-        boolean connectionTest = connectionUtil.test(connectionBeanBuilder);
-        if (connectionTest) {
-          envManagerService.set("ConnectionBean", connectionBeanBuilder.build());
-        }
+        loadConnection(connectionBeanBuilder, connectionUtil);
+        display.scanLine();
       } catch (EmptyValueException e) {
       } finally {
         setBusy(false);
+        menuManager.getMenuMap().get(MenuType.MainMenu).update();
         menuManager.load(MenuType.MainMenu);
       }
     });
+  }
+
+  private void loadConnection(ConnectionBeanBuilder connectionBeanBuilder, ConnectionUtil connectionUtil)
+      throws EmptyValueException {
+
+    String host, port, username, password, dbType, database;
+    double dbVersion;
+
+    display.sendLog("hostname: Default 'localhost'");
+    host = display.scanLine();
+    display.sendLog(host);
+
+    display.sendLog("port: Default 3306");
+    port = display.scanLine();
+    display.sendLog(port);
+
+    display.sendLog("username: Default: root");
+    username = display.scanLine();
+    display.sendLog(username);
+
+    display.sendLog("password: ");
+    password = display.scanLine();
+
+    display.sendLog("Database Type (Default MySql): ");
+    dbType = display.scanLine();
+    display.sendLog(dbType);
+
+    display.sendLog("Database version (Default 5.0): ");
+    dbVersion = display.scanDouble();
+    display.sendLog(Double.toString(dbVersion));
+
+    display.sendLog("Database name: ");
+    database = display.scanLine();
+    display.sendLog(database);
+
+    setBusy(true);
+    connectionBeanBuilder
+        .setHost((host.isBlank() ? "localhost" : host))
+        .setPort((port.isBlank() ? "3306" : port))
+        .setUsername((username.isBlank() ? "root" : username))
+        .setPassword(password)
+        .setDBType(dbType)
+        .setDBVersion(dbVersion)
+        .setDatabase(database);
+
+    display.clean();
+    display.sendLog("Testing connection...");
+    boolean connectionTest = connectionUtil.test(connectionBeanBuilder);
+    if (connectionTest) {
+      display.sendLog("Connection OK");
+      envManagerService.set("ConnectionBean", connectionBeanBuilder.build());
+      DataLayerProvider dataLayerProvider = (DataLayerProvider) envManagerService.get("dataLayerProvider");
+      dataLayerProvider.initDataLayer();
+    } else
+      display.sendLog("Connection Failed");
+
   }
 }
