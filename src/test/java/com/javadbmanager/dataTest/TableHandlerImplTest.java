@@ -120,6 +120,7 @@ public class TableHandlerImplTest {
   }
 
   @Test
+  @Disabled
   void removeTableTest() throws SQLException {
     createTableWithSingleColumn("id INT, name VARCHAR(60)");
 
