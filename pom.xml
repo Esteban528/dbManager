@@ -32,6 +32,13 @@
       <version>8.0.33</version>
     </dependency>
 
+    <!-- Postgresql Connector -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.7.3</version>
+    </dependency>
+
     <!-- Commons DBCP2 -->
     <dependency>
       <groupId>org.apache.commons</groupId>

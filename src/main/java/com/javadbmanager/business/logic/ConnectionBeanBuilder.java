@@ -33,7 +33,16 @@ public class ConnectionBeanBuilder {
   }
 
   public ConnectionBeanBuilder setDBType(String dbType) {
-    this.dbType = dbType;
+    String result = this.dbType;
+    dbType = dbType.toLowerCase();
+    
+    if (dbType.contains("postgres"))
+      result = "postgresql";
+    else if(dbType.contains("mysq"))
+      result = "mysql";
+
+    this.dbType = result;
+
     return this;
   }
 

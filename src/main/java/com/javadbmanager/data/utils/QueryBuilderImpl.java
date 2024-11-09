@@ -1,186 +1,98 @@
 package com.javadbmanager.data.utils;
 
-import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 import com.javadbmanager.data.exceptions.ColumnNotFoundException;
 
 public class QueryBuilderImpl implements QueryBuilder {
 
-  public String makeInsert(String tableName, Map<String, String> items, Map<String, String> columnsTable)
-      throws ColumnNotFoundException {
-    String query;
-    StringBuilder columns = new StringBuilder(), values = new StringBuilder();
+    public String makeInsert(String tableName, Map<String, String> items, Map<String, String> columnsTable)
+            throws ColumnNotFoundException {
+        validateColumns(items.keySet(), columnsTable, tableName);
 
-    Iterator<String> iterator = items.keySet().iterator();
-    int remainingElements = items.size();
-    while (iterator.hasNext()) {
-      remainingElements--;
-      String key = iterator.next();
+        String columns = String.join(", ", items.keySet());
+        String values = items.values().stream()
+                .map(value -> String.format("'%s'", value))
+                .collect(Collectors.joining(", "));
 
-      if (columnsTable.get(key) == null) {
-        throw new ColumnNotFoundException(key, tableName);
-      }
-
-      String comma = ((remainingElements > 0) ? ", " : "");
-      columns.append(key + comma);
-      values.append(String.format("'%s'" + comma, items.get(key)));
+        return String.format("INSERT INTO %s (%s) VALUES (%s)", tableName, columns, values);
     }
 
-    query = String.format("INSERT INTO %s (%s) VALUES(%s)", tableName, columns.toString(), values.toString());
-    return query;
-  }
+    public String makeSelect(String tableName, Map<String, String> wheres, Map<String, String> columnsTable) {
+        validateColumns(wheres.keySet(), columnsTable, tableName);
 
-  public String makeSelect(String tableName, Map<String, String> wheres, Map<String, String> columnsTable) {
-    String query;
-    StringBuilder wherePart = new StringBuilder();
-
-    Iterator<String> iterator = wheres.keySet().iterator();
-    int remainingElements = wheres.size();
-    while (iterator.hasNext()) {
-      remainingElements--;
-      String key = iterator.next();
-
-      if (columnsTable.get(key) == null) {
-        throw new ColumnNotFoundException(key, tableName);
-      }
-
-      String sqlSeparator = ((remainingElements > 0) ? " AND " : "");
-      wherePart.append(String.format(" %s = '%s' %s", key, wheres.get(key), sqlSeparator));
+        String whereClause = makeWhereClause(wheres);
+        return String.format("SELECT * FROM %s%s", tableName, whereClause);
     }
 
-    query = String.format("SELECT * FROM %s %s %s", tableName, (!wheres.isEmpty() ? "WHERE" : ""),
-        wherePart.toString());
-    return query;
-  }
+    public String makeUpdate(String tableName, Map<String, String> items, Map<String, String> wheres,
+            Map<String, String> columnsTable) {
+        validateColumns(items.keySet(), columnsTable, tableName);
+        validateColumns(wheres.keySet(), columnsTable, tableName);
 
-  public String makeUpdate(String tableName, Map<String, String> items, Map<String, String> wheres,
-      Map<String, String> columnsTable) {
+        String setClause = items.entrySet().stream()
+                .map(entry -> String.format("%s = '%s'", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(", "));
 
-    String query;
-    StringBuilder updateValues = new StringBuilder(), whereValues = new StringBuilder();
-
-    Iterator<String> iterator = items.keySet().iterator();
-    int remainingElements = items.size();
-
-    if (!wheres.isEmpty()) {
-      whereValues.append(" WHERE ");
+        String whereClause = makeWhereClause(wheres);
+        return String.format("UPDATE %s SET %s%s", tableName, setClause, whereClause);
     }
 
-    while (iterator.hasNext()) {
-      remainingElements--;
-      String key = iterator.next();
+    public String makeDelete(String tableName, Map<String, String> wheres, Map<String, String> columnsTable) {
+        validateColumns(wheres.keySet(), columnsTable, tableName);
 
-      if (columnsTable.get(key) == null) {
-        throw new ColumnNotFoundException(key, tableName);
-      }
-
-      String sqlSeparator = ((remainingElements > 0) ? " , " : "");
-      updateValues.append(String.format("%s = '%s' %s", key, items.get(key), sqlSeparator));
+        String whereClause = makeWhereClause(wheres);
+        return String.format("DELETE FROM %s%s", tableName, whereClause);
     }
 
-    iterator = wheres.keySet().iterator();
-    remainingElements = wheres.size();
+    public String makeCreateTable(String tableName, Map<String, String> columns) {
+        String columnsDefinition = columns.entrySet().stream()
+                .map(entry -> entry.getKey() + " " + entry.getValue())
+                .collect(Collectors.joining(", "));
 
-    while (iterator.hasNext()) {
-      remainingElements--;
-      String key = iterator.next();
-
-      if (columnsTable.get(key) == null) {
-        throw new ColumnNotFoundException(key, tableName);
-      }
-
-      String sqlSeparator = ((remainingElements > 0) ? " AND " : "");
-      whereValues.append(String.format("%s = '%s' %s", key, wheres.get(key), sqlSeparator));
+        return String.format("CREATE TABLE IF NOT EXISTS %s (%s)", tableName, columnsDefinition);
     }
 
-    query = String.format("UPDATE %s SET %s %s", tableName, updateValues.toString(), whereValues.toString());
-    return query;
-  }
-
-  public String makeDelete(String tableName, Map<String, String> wheres, Map<String, String> columnsTable) {
-    String query;
-    StringBuilder wherePart = new StringBuilder();
-
-    Iterator<String> iterator = wheres.keySet().iterator();
-    int remainingElements = wheres.size();
-    while (iterator.hasNext()) {
-      remainingElements--;
-      String key = iterator.next();
-
-      if (columnsTable.get(key) == null) {
-        throw new ColumnNotFoundException(key, tableName);
-      }
-
-      String sqlSeparator = ((remainingElements > 0) ? "AND " : "");
-      wherePart.append(String.format("%s = '%s' %s", key, wheres.get(key), sqlSeparator));
+    public String makeCreateTableColumn(String tableName, String columnName, String dataType, String... constraints) {
+        String constraintClause = String.join(" ", constraints);
+        return String.format("ALTER TABLE %s ADD %s %s %s", tableName, columnName, dataType, constraintClause);
     }
 
-    query = String.format("DELETE %s WHERE %s", tableName, wherePart.toString());
-    return query;
-  }
-
-  public String makeCreateTable(String tableName, Map<String, String> values) {
-    String query, columnName, args, sqlSeparator;
-    StringBuilder valueString = new StringBuilder();
-
-    Iterator<String> iterator = values.keySet().iterator();
-    int remainingElements = values.size();
-    while (iterator.hasNext()) {
-      remainingElements--;
-      columnName = iterator.next();
-      args = values.get(columnName);
-
-      sqlSeparator = ((remainingElements > 0) ? ", " : "");
-      valueString.append(columnName);
-      valueString.append(" ");
-      valueString.append(args);
-      valueString.append(sqlSeparator);
-    }
-    query = String.format("CREATE TABLE IF NOT EXISTS %s (%s)", tableName, valueString.toString());
-
-    return query;
-  }
-
-  public String makeCreateTableColumn(String tableName, String columnName, String dataType,
-      String... constraints) {
-
-    String query;
-    StringBuilder constraint = new StringBuilder();
-
-    for (String word : constraints) {
-      constraint.append(word);
-      constraint.append(" ");
+    public String makeDropTable(String tableName) {
+        return String.format("DROP TABLE %s", tableName);
     }
 
-    query = String.format("ALTER TABLE %s ADD %s %s %s", tableName, columnName, dataType, constraint);
-
-    return query;
-  }
-
-  public String makeDropTable(String tableName) {
-    return String.format("DROP TABLE %s", tableName);
-  }
-
-  public String makeDropColumn(String tableName, String column) {
-    return String.format("ALTER TABLE %s DROP COLUMN %s", tableName, column);
-  }
-
-  public String makeAlterTable(String tableName, String column, String... constraints) {
-    StringBuilder queryConstraints = new StringBuilder();
-
-    for (String string : constraints) {
-      queryConstraints.append(string);
-      queryConstraints.append(" ");
+    public String makeDropColumn(String tableName, String column) {
+        return String.format("ALTER TABLE %s DROP COLUMN %s", tableName, column);
     }
 
-    return String.format("ALTER TABLE %s MODIFY COLUMN %s %s", tableName, column, queryConstraints.toString());
-  }
+    public String makeAlterTable(String tableName, String column, String... constraints) {
+        String constraintClause = String.join(" ", constraints);
+        return String.format("ALTER TABLE %s MODIFY COLUMN %s %s", tableName, column, constraintClause);
+    }
 
-  public String makeSelectWithLimit(String tableName, int limit) {
-    return String.format("SELECT * FROM %s LIMIT %d", tableName, limit);
-  }
+    public String makeSelectWithLimit(String tableName, int limit) {
+        return String.format("SELECT * FROM %s LIMIT %d", tableName, limit);
+    }
 
-  public String makeRenameColumn(String tableName, String columnName, String newName) {
-    return String.format("ALTER TABLE %s RENAME COLUMN %s to %s;", tableName, columnName, newName);
-  }
+    public String makeRenameColumn(String tableName, String columnName, String newName) {
+        return String.format("ALTER TABLE %s RENAME COLUMN %s TO %s;", tableName, columnName, newName);
+    }
+
+    private String makeWhereClause(Map<String, String> wheres) {
+        if (wheres.isEmpty())
+            return "";
+        return " WHERE " + wheres.entrySet().stream()
+                .map(entry -> String.format("%s = '%s'", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(" AND "));
+    }
+
+    private void validateColumns(Iterable<String> keys, Map<String, String> columnsTable, String tableName)
+            throws ColumnNotFoundException {
+        for (String key : keys) {
+            if (!columnsTable.containsKey(key)) {
+                throw new ColumnNotFoundException(key, tableName);
+            }
+        }
+    }
 }

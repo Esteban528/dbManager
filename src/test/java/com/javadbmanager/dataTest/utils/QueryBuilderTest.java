@@ -1,9 +1,12 @@
+
 package com.javadbmanager.dataTest.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -11,180 +14,156 @@ import com.javadbmanager.data.exceptions.ColumnNotFoundException;
 import com.javadbmanager.data.utils.QueryBuilderImpl;
 
 public class QueryBuilderTest {
-  private QueryBuilderImpl queryBuilder = new QueryBuilderImpl();
 
-  @Test
-  void makeInsertTest() {
-    String tableName = "exampleTable";
-    HashMap<String, String> items = new HashMap<>();
-    HashMap<String, String> columnsTable = new HashMap<>();
+    private final QueryBuilderImpl queryBuilder = new QueryBuilderImpl();
 
-    columnsTable.put("username", "VARCHAR (50)");
-    columnsTable.put("rank", "VARCHAR (20)");
-    columnsTable.put("experience", "INT (11)");
+    @Test
+    void makeInsertTest() throws ColumnNotFoundException {
+        String tableName = "exampleTable";
+        Map<String, String> items = new HashMap<>();
+        Map<String, String> columnsTable = new HashMap<>();
 
-    items.put("username", "estebandev");
-    items.put("rank", "JavaDeveloper");
-    items.put("experience", "3");
+        columnsTable.put("username", "VARCHAR(50)");
+        columnsTable.put("rank", "VARCHAR(20)");
+        columnsTable.put("experience", "INT(11)");
 
-    String query = queryBuilder.makeInsert(tableName, items, columnsTable);
+        items.put("username", "estebandev");
+        items.put("rank", "JavaDeveloper");
+        items.put("experience", "3");
 
-    assertEquals("INSERT INTO exampleTable (rank, experience, username) VALUES('JavaDeveloper', '3', 'estebandev')",
-        query);
+        String query = queryBuilder.makeInsert(tableName, items, columnsTable);
+        String expectedQuery = "INSERT INTO exampleTable (rank, experience, username) VALUES ('JavaDeveloper', '3', 'estebandev')";
+        assertEquals(expectedQuery, query);
 
-    columnsTable = new HashMap<>();
-    boolean bool = false;
-    try {
-      query = queryBuilder.makeInsert(tableName, items, columnsTable);
-    } catch (ColumnNotFoundException e) {
-      bool = true;
+        columnsTable.clear();
+        assertThrows(ColumnNotFoundException.class, () -> queryBuilder.makeInsert(tableName, items, columnsTable));
     }
 
-    assertTrue(bool);
-  }
+    @Test
+    void makeSelectTest() {
+        String tableName = "exampleTable";
+        Map<String, String> wheres = new HashMap<>();
+        Map<String, String> columnsTable = new HashMap<>();
 
-  @Test
-  void makeSelectTest() {
-    String tableName = "exampleTable";
-    HashMap<String, String> whereMap = new HashMap<>();
-    HashMap<String, String> columnsTable = new HashMap<>();
+        columnsTable.put("id", "INT");
+        columnsTable.put("username", "VARCHAR(50)");
 
-    columnsTable.put("id", "INT");
-    columnsTable.put("username", "VARCHAR (50)");
-    columnsTable.put("rank", "VARCHAR (20)");
-    columnsTable.put("experience", "INT (11)");
+        wheres.put("id", "5");
 
-    whereMap.put("id", "5");
+        String query = queryBuilder.makeSelect(tableName, wheres, columnsTable);
+        String expectedQuery = "SELECT * FROM exampleTable WHERE id = '5'";
+        assertEquals(expectedQuery, query);
 
-    String query = queryBuilder.makeSelect(tableName, whereMap, columnsTable);
-    String queryExpect = "SELECT * FROM exampleTable WHERE  id = '5'";
+        query = queryBuilder.makeSelect(tableName, new HashMap<>(), columnsTable);
+        assertEquals("SELECT * FROM exampleTable", query);
 
-    assertTrue(query.contains(queryExpect));
-    query = queryBuilder.makeSelect(tableName, new HashMap<>(), columnsTable);
-    assertEquals("SELECT * FROM exampleTable  ", query);
-
-    columnsTable = new HashMap<>();
-    boolean bool = false;
-    try {
-      query = queryBuilder.makeSelect(tableName, whereMap, columnsTable);
-    } catch (ColumnNotFoundException e) {
-      bool = true;
+        columnsTable.clear();
+        assertThrows(ColumnNotFoundException.class, () -> queryBuilder.makeSelect(tableName, wheres, columnsTable));
     }
 
-    assertTrue(bool);
-  }
+    @Test
+    void makeUpdateTest() {
+        String tableName = "exampleTable";
+        Map<String, String> values = new HashMap<>();
+        Map<String, String> wheres = new HashMap<>();
+        Map<String, String> columnsTable = new HashMap<>();
 
-  @Test
-  void makeUpdateTest() {
-    String tableName = "exampleTable";
-    HashMap<String, String> values = new HashMap<>();
-    HashMap<String, String> whereMap = new HashMap<>();
-    HashMap<String, String> columnsTable = new HashMap<>();
+        columnsTable.put("username", "VARCHAR(50)");
+        columnsTable.put("experience", "INT(11)");
 
-    columnsTable.put("id", "INT");
-    columnsTable.put("username", "VARCHAR (50)");
-    columnsTable.put("rank", "VARCHAR (20)");
-    columnsTable.put("experience", "INT (11)");
+        values.put("username", "estebandev");
+        wheres.put("experience", "20");
 
-    values.put("username", "estebandev");
-    values.put("experience", "20");
-    whereMap.put("id", "5");
-    whereMap.put("rank", "JavaDeveloper");
+        String query = queryBuilder.makeUpdate(tableName, values, wheres, columnsTable);
+        String expectedQuery = "UPDATE exampleTable SET username = 'estebandev' WHERE experience = '20'";
+        assertEquals(expectedQuery, query);
 
-    String query = queryBuilder.makeUpdate(tableName, values, whereMap, columnsTable);
-    String queryExpect = "UPDATE exampleTable SET experience = '20'  , username = 'estebandev'   WHERE rank = 'JavaDeveloper'  AND id = '5'";
-    assertTrue(query.contains(queryExpect));
-
-    columnsTable = new HashMap<>();
-    boolean bool = false;
-    try {
-      query = queryBuilder.makeUpdate(tableName, values, whereMap, columnsTable);
-    } catch (ColumnNotFoundException e) {
-      bool = true;
+        columnsTable.clear();
+        assertThrows(ColumnNotFoundException.class, () -> queryBuilder.makeUpdate(tableName, values, wheres, columnsTable));
     }
 
-    assertTrue(bool);
-  }
+    @Test
+    void makeDeleteTest() {
+        String tableName = "exampleTable";
+        Map<String, String> wheres = new HashMap<>();
+        Map<String, String> columnsTable = new HashMap<>();
 
-  @Test
-  void makeDeleteTest() {
-    String tableName = "exampleTable";
-    HashMap<String, String> whereMap = new HashMap<>();
-    HashMap<String, String> columnsTable = new HashMap<>();
+        columnsTable.put("username", "VARCHAR(50)");
 
-    columnsTable.put("id", "INT");
-    columnsTable.put("username", "VARCHAR (50)");
-    columnsTable.put("rank", "VARCHAR (20)");
-    columnsTable.put("experience", "INT (11)");
-    whereMap.put("id", "5");
-    whereMap.put("rank", "JavaDeveloper");
+        wheres.put("username", "estebandev");
 
-    String query = queryBuilder.makeDelete(tableName, whereMap, columnsTable);
-    String queryExpect = "DELETE exampleTable WHERE rank = 'JavaDeveloper' AND id = '5'";
-    assertTrue(query.contains(queryExpect));
+        String query = queryBuilder.makeDelete(tableName, wheres, columnsTable);
+        String expectedQuery = "DELETE FROM exampleTable WHERE username = 'estebandev'";
+        assertEquals(expectedQuery, query);
 
-    columnsTable = new HashMap<>();
-    boolean bool = false;
-    try {
-      query = queryBuilder.makeDelete(tableName, whereMap, columnsTable);
-    } catch (ColumnNotFoundException e) {
-      bool = true;
+        columnsTable.clear();
+        assertThrows(ColumnNotFoundException.class, () -> queryBuilder.makeDelete(tableName, wheres, columnsTable));
     }
 
-    assertTrue(bool);
-  }
+    @Test
+    void makeCreateTableTest() {
+        String tableName = "exampleTable";
+        Map<String, String> columnsTable = new HashMap<>();
 
-  @Test
-  void makeCreateTableTest() {
-    String tableName = "exampleTable";
-    HashMap<String, String> columnsTable = new HashMap<>();
+        columnsTable.put("id", "INT PRIMARY KEY");
+        columnsTable.put("username", "VARCHAR(50) NOT NULL");
 
-    columnsTable.put("id", "INT PRIMARY KEY");
-    columnsTable.put("username", " VARCHAR(60) NOT NULL UNIQUE");
-    columnsTable.put("rank", "VARCHAR (50)");
-    columnsTable.put("experience", "INT (11)");
+        String query = queryBuilder.makeCreateTable(tableName, columnsTable);
+        String expectedQuery = "CREATE TABLE IF NOT EXISTS exampleTable (id INT PRIMARY KEY, username VARCHAR(50) NOT NULL)";
+        assertEquals(expectedQuery, query);
+    }
 
-    String query = queryBuilder.makeCreateTable(tableName, columnsTable);
-    String queryExpect = "CREATE TABLE IF NOT EXISTS exampleTable (rank VARCHAR (50), id INT PRIMARY KEY, experience INT (11), username  VARCHAR(60) NOT NULL UNIQUE)";
-    assertEquals(queryExpect, query);
-  }
+    @Test
+    void makeCreateTableColumnTest() {
+        String tableName = "exampleTable";
+        String query = queryBuilder.makeCreateTableColumn(tableName, "email", "VARCHAR(60)", "NOT NULL", "UNIQUE");
+        String expectedQuery = "ALTER TABLE exampleTable ADD email VARCHAR(60) NOT NULL UNIQUE";
+        assertEquals(expectedQuery, query);
+    }
 
-  @Test
-  void makeCreateTableColumn() {
-    String tableName = "exampleTable";
+    @Test
+    void makeDropTableTest() {
+        String tableName = "exampleTable";
+        String query = queryBuilder.makeDropTable(tableName);
+        String expectedQuery = "DROP TABLE exampleTable";
+        assertEquals(expectedQuery, query);
+    }
 
-    String query = queryBuilder.makeCreateTableColumn(tableName, "email", "VARCHAR(60)", "NOT NULL", "UNIQUE");
-    String queryExpect = "ALTER TABLE exampleTable ADD email VARCHAR(60) NOT NULL UNIQUE";
-    assertTrue(query.contains(queryExpect));
-  }
+    @Test
+    void makeDropColumnTest() {
+        String tableName = "exampleTable";
+        String column = "username";
+        String query = queryBuilder.makeDropColumn(tableName, column);
+        String expectedQuery = "ALTER TABLE exampleTable DROP COLUMN username";
+        assertEquals(expectedQuery, query);
+    }
 
-  @Test
-  void makeDropTableTest() {
-    String tableName = "exampleTable";
+    @Test
+    void makeAlterTableTest() {
+        String tableName = "exampleTable";
+        String column = "username";
+        String query = queryBuilder.makeAlterTable(tableName, column, "VARCHAR(50)", "NOT NULL");
+        String expectedQuery = "ALTER TABLE exampleTable MODIFY COLUMN username VARCHAR(50) NOT NULL";
+        assertEquals(expectedQuery, query);
+    }
 
-    String query = queryBuilder.makeDropTable(tableName);
-    String queryExpect = "DROP TABLE exampleTable";
-    assertTrue(query.contains(queryExpect));
-  }
+    @Test
+    void makeSelectWithLimitTest() {
+        String tableName = "exampleTable";
+        int limit = 10;
+        String query = queryBuilder.makeSelectWithLimit(tableName, limit);
+        String expectedQuery = "SELECT * FROM exampleTable LIMIT 10";
+        assertEquals(expectedQuery, query);
+    }
 
-  @Test
-  void makeDropColumnTest() {
-    String tableName = "exampleTable";
-    String columnName = "columnName";
-
-    String query = queryBuilder.makeDropColumn(tableName, columnName);
-    String queryExpect = "ALTER TABLE exampleTable DROP COLUMN columnName";
-    assertTrue(query.contains(queryExpect));
-  }
-
-  @Test
-  void makeAlterTableTest() {
-    String tableName = "exampleTable";
-    String columnName = "columnName";
-
-    String query = queryBuilder.makeAlterTable(tableName, columnName, "INT (5)", "DEFAULT", "NOT NULL");
-    String queryExpect = "ALTER TABLE exampleTable MODIFY COLUMN columnName INT (5) DEFAULT NOT NULL";
-    assertTrue(query.contains(queryExpect));
-
-  }
+    @Test
+    void makeRenameColumnTest() {
+        String tableName = "exampleTable";
+        String columnName = "oldColumn";
+        String newName = "newColumn";
+        String query = queryBuilder.makeRenameColumn(tableName, columnName, newName);
+        String expectedQuery = "ALTER TABLE exampleTable RENAME COLUMN oldColumn TO newColumn;";
+        assertEquals(expectedQuery, query);
+    }
 }
+

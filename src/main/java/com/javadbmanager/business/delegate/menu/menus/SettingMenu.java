@@ -90,8 +90,9 @@ public class SettingMenu extends Menu {
       envManagerService.set("ConnectionBean", connectionBeanBuilder.build());
       DataLayerProvider dataLayerProvider = (DataLayerProvider) envManagerService.get("dataLayerProvider");
       dataLayerProvider.initDataLayer();
-    } else
+    } else {
       display.sendLog("Connection Failed");
-
+      display.scan();
+    }
   }
 }
