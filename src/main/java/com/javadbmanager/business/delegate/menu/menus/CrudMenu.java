@@ -177,9 +177,9 @@ class CrudMenuOptions {
     List<Map<String, String>> items = (filterMap.isEmpty()) ? dataService.get() : dataService.get(filterMap);
 
     items.forEach(item -> {
+      display.addLog("- - - - - - - - - - - - - - - - - - - - - - -");
       item.keySet().forEach(key -> {
         String message = String.format("%s = %s", key, item.get(key));
-        display.addLog("- - - - - - - - - - - - - - - - - - - - - - -");
         display.addLog(message);
       });
     });
