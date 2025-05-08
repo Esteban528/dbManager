@@ -1,7 +1,9 @@
 package com.javadbmanager.business.logic.utils;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.function.Function;
 
 import com.javadbmanager.business.logic.ConnectionBeanBuilder;
 import com.javadbmanager.data.ConnectionBean;
@@ -37,5 +39,33 @@ public class ConnectionUtil {
         }
 
         return result;
+    }
+
+    /**
+     * Establishes a simple database connection using a {@link ConnectionBeanBuilder} 
+     * and executes a given function with the resulting {@link Connection}.
+     *
+     * <p>This method is a utility for executing operations that require a JDBC connection. 
+     * It builds the connection configuration, opens the connection, passes it to the given function,
+     * and ensures the connection is properly closed afterward.</p>
+     *
+     * @param connectionBeanBuilder the builder that provides the necessary connection parameters; must not be {@code null}
+     * @param fun a {@link Function} that receives an open {@link Connection} and returns a result; must not be {@code null}
+     * @return the result of applying the given function to the open connection, or {@code null} if the builder is {@code null} or an exception occurs
+     */
+    public Object run(ConnectionBeanBuilder connectionBeanBuilder, Function<Connection, Object> fun) {
+        if (connectionBeanBuilder == null) {
+            return null; 
+        }
+
+        ConnectionBean connectionBean = connectionBeanBuilder.build();
+
+        ConnectionHandler connectionHandler = new ConnectionHandlerImpl(connectionBean, new DataUtilsImpl());
+        try(Connection con = connectionHandler.getConnection()) {
+            return fun.apply(con);
+        } catch (SQLException e) {
+        }
+
+        return null;
     }
 }
