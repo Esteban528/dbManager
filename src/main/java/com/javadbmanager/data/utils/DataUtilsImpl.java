@@ -12,6 +12,7 @@ import com.javadbmanager.data.ConnectionBean;
 public class DataUtilsImpl implements DataUtils {
     private final Map<String, String> databaseEngineMap = Map.of(
             "mysql", "jdbc:mysql://%s:%s/%s?useSSL=false&%s",
+            "mysql_1", "jdbc:mysql://%s:%s?useSSL=false&%s",
             "postgresql", "jdbc:postgresql://%s:%s/%s?ssl=false&%s"
         );
 
@@ -19,15 +20,16 @@ public class DataUtilsImpl implements DataUtils {
     public String makeUrl(ConnectionBean connectionBean) {
         String url, properties = "&useTimezone=true&serverTimezone=UTC";
 
-        if (connectionBean.getDatabase().equals("mysql") && connectionBean.getDBversion() >= 8) {
+        if (connectionBean.getDBType().equalsIgnoreCase("mysql") && connectionBean.getDBversion() >= 8) {
             properties += "&allowPublicKeyRetrieval=true";
         }
 
         url = String.format(
-            databaseEngineMap.getOrDefault(connectionBean.getDBType(), databaseEngineMap.get("mysql")),
+            databaseEngineMap.getOrDefault(connectionBean.getDatabase().isEmpty() ? "mysql_1" 
+                : connectionBean.getDBType(), databaseEngineMap.get("mysql")),
             connectionBean.getHost(),
             connectionBean.getPort(),
-            connectionBean.getDatabase(),
+            connectionBean.getDatabase().isEmpty() ? properties : connectionBean.getDatabase(),
             properties
         );
 
