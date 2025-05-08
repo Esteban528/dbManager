@@ -96,7 +96,6 @@ public class SettingMenu extends Menu {
               Set<String> dbNameSet = new HashSet<>();
               while (rs.next()) {
                 String dbName = rs.getString("TABLE_CAT");
-                System.out.println(dbName + " test");
                 dbNameSet.add(dbName);
               }
               return dbNameSet;
