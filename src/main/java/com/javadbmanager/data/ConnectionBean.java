@@ -10,7 +10,7 @@ public class ConnectionBean implements Serializable {
   private String password;
   private String DBType = "MySQL";
   private double DBversion = 5;
-  private String database;
+  private String database = "";
 
   public ConnectionBean() {
 

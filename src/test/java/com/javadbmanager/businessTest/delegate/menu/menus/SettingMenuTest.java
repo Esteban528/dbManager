@@ -96,6 +96,8 @@ public class SettingMenuTest {
 
     when(connectionUtil.test(any(ConnectionBeanBuilder.class)))
         .thenReturn(true);
+
+    when(connectionBeanBuilder.getDbType()).thenReturn("");
     options.get(1).execute();
 
     verify(connectionBeanBuilder).setHost(anyString());
@@ -119,6 +121,8 @@ public class SettingMenuTest {
 
     when(connectionUtil.test(connectionBeanBuilder))
         .thenReturn(false);
+
+    when(connectionBeanBuilder.getDbType()).thenReturn("");
     options.get(1).execute();
 
     verify(connectionBeanBuilder).setHost(anyString());

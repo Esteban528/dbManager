@@ -18,7 +18,7 @@ class ConnectionBeanBuilderTest {
     assertEquals("", connectionBean.getPassword());
     assertEquals("mysql", connectionBean.getDBType());
     assertEquals(8.1, connectionBean.getDBversion());
-    assertEquals("users", connectionBean.getDatabase());
+    assertEquals("", connectionBean.getDatabase());
   }
 
   @Test
@@ -55,6 +55,6 @@ class ConnectionBeanBuilderTest {
     assertEquals("", connectionBean.getPassword()); // Default value
     assertEquals("mysql", connectionBean.getDBType()); // Default value
     assertEquals(8.1, connectionBean.getDBversion()); // Default value
-    assertEquals("users", connectionBean.getDatabase()); // Default value
+    assertEquals("", connectionBean.getDatabase()); // Default value
   }
 }

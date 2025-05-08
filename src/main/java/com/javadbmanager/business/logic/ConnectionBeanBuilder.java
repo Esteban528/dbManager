@@ -3,8 +3,9 @@ package com.javadbmanager.business.logic;
 import com.javadbmanager.data.ConnectionBean;
 
 /**
- * A builder class for creating {@code ConnectionBean} objects.  This class uses the builder pattern
- * to provide a flexible and readable way to construct connection beans with various configurations.
+ * A builder class for creating {@code ConnectionBean} objects.  
+ * This class uses the builder pattern to provide a flexible and readable way 
+ * to construct connection beans with various configurations.
  */
 public class ConnectionBeanBuilder {
 
@@ -14,7 +15,7 @@ public class ConnectionBeanBuilder {
     private String password = "";
     private String dbType = "mysql";
     private double dbVersion = 8.1;
-    private String database = "users";
+    private String database = "";
 
     /**
      * Sets the hostname or IP address of the database server.
@@ -57,9 +58,9 @@ public class ConnectionBeanBuilder {
     }
 
     /**
-     * Sets the database type (e.g., "mysql", "postgresql").  The input is case-insensitive
-     * and will be normalized to "mysql" or "postgresql".
-     * @param dbType The database type.  Default is "mysql".
+     * Sets the database type (e.g., "mysql", "postgresql"). 
+     * The input is case-insensitive and will be normalized to "mysql" or "postgresql".
+     * @param dbType The database type. Default is "mysql".
      * @return This builder instance for method chaining.
      */
     public ConnectionBeanBuilder setDBType(String dbType) {
@@ -96,12 +97,67 @@ public class ConnectionBeanBuilder {
         return this;
     }
 
-
     /**
      * Creates a new {@code ConnectionBean} object using the configured parameters.
      * @return The newly constructed {@code ConnectionBean}.
      */
     public ConnectionBean build() {
         return new ConnectionBean(host, port, username, password, dbType, dbVersion, database);
+    }
+
+    /**
+     * Gets the configured host.
+     * @return The database host.
+     */
+    public String getHost() {
+        return host;
+    }
+
+    /**
+     * Gets the configured port.
+     * @return The database port.
+     */
+    public String getPort() {
+        return port;
+    }
+
+    /**
+     * Gets the configured username.
+     * @return The database username.
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * Gets the configured password.
+     * @return The database password.
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Gets the configured database type.
+     * @return The database type (e.g., "mysql" or "postgresql").
+     */
+    public String getDbType() {
+        return dbType;
+    }
+
+    /**
+     * Gets the configured database version.
+     * @return The database version.
+     */
+    public double getDbVersion() {
+        return dbVersion;
+    }
+
+    /**
+     * Gets the configured database name.
+     * @return The database name.
+     */
+    public String getDatabase() {
+        return database;
     }
 }

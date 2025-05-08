@@ -1,5 +1,12 @@
 package com.javadbmanager.business.delegate.menu.menus;
 
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.javadbmanager.business.delegate.menu.Menu;
 import com.javadbmanager.business.delegate.menu.MenuManager;
 import com.javadbmanager.business.delegate.menu.MenuType;
@@ -39,6 +46,7 @@ public class SettingMenu extends Menu {
     });
   }
 
+  @SuppressWarnings("unchecked")
   private void loadConnection(ConnectionBeanBuilder connectionBeanBuilder, ConnectionUtil connectionUtil)
       throws EmptyValueException {
 
@@ -60,7 +68,7 @@ public class SettingMenu extends Menu {
     display.sendLog("password: ");
     password = display.scanLine();
 
-    display.sendLog("Database Type (Default MySql): ");
+    display.sendLog("Database Type (Default mysql): ");
     dbType = display.scanLine();
     display.sendLog(dbType);
 
@@ -68,9 +76,6 @@ public class SettingMenu extends Menu {
     dbVersion = display.scanDouble();
     display.sendLog(Double.toString(dbVersion));
 
-    display.sendLog("Database name: ");
-    database = display.scanLine();
-    display.sendLog(database);
 
     setBusy(true);
     connectionBeanBuilder
@@ -79,8 +84,35 @@ public class SettingMenu extends Menu {
         .setUsername((username.isBlank() ? "root" : username))
         .setPassword(password)
         .setDBType(dbType)
-        .setDBVersion(dbVersion)
-        .setDatabase(database);
+        .setDBVersion(dbVersion);
+
+    String dbLists = "";
+
+    if (connectionBeanBuilder.getDbType().equalsIgnoreCase("mysql")) {
+        Object result = connectionUtil.run(connectionBeanBuilder, (con) -> {
+            try {
+              DatabaseMetaData metaData = con.getMetaData();
+              ResultSet rs = metaData.getCatalogs();
+              Set<String> dbNameSet = new HashSet<>();
+              while (rs.next()) {
+                String dbName = rs.getString("TABLE_CAT");
+                System.out.println(dbName + " test");
+                dbNameSet.add(dbName);
+              }
+              return dbNameSet;
+          } catch (SQLException e) {
+            return null;
+          }
+        });
+      if (result != null) {
+        dbLists = ((Set<String>) result).stream().collect(Collectors.joining(", "));
+      }
+    }
+
+    display.sendLog("Database name " + String.format("( %s ):", dbLists));
+    database = display.scanLine();
+    display.sendLog(database);
+    connectionBeanBuilder.setDatabase(database);
 
     display.clean();
     display.sendLog("Testing connection...");
