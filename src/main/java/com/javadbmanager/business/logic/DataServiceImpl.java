@@ -1,8 +1,10 @@
 package com.javadbmanager.business.logic;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.javadbmanager.business.logic.exceptions.BusinessException;
 import com.javadbmanager.data.AnyRepository;
@@ -123,6 +125,15 @@ public class DataServiceImpl implements DataService {
       this.connectionHandler.close();
     } catch (SQLException e) {
       throw new BusinessException(e.getMessage(), e);
+    }
+  }
+
+  @Override
+  public Object execute(Function<Connection, Object> fun) {
+    try {
+      return fun.apply(connectionHandler.getConnection());
+    } catch (SQLException e) {
+      return null;
     }
   }
 }

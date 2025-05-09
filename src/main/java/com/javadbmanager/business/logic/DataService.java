@@ -1,8 +1,10 @@
 package com.javadbmanager.business.logic;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.javadbmanager.business.logic.exceptions.BusinessException;
 import com.javadbmanager.data.AnyRepository;
@@ -84,6 +86,18 @@ public interface DataService {
      * @return The {@code AnyRepository} instance.
      */
     AnyRepository getAnyRepository();
+
+    /**
+     * Executes a given function with the resulting {@link Connection}.
+     *
+     * <p>This method is a utility for executing operations that require a JDBC connection. 
+     * It builds the connection configuration, opens the connection, passes it to the given function,
+     * and ensures the connection is properly closed afterward.</p>
+     *
+     * @param fun a {@link Function} that receives an open {@link Connection} and returns a result; must not be {@code null}
+     * @return the result of applying the given function to the open connection, or {@code null} if the builder is {@code null} or an exception occurs
+     */
+    Object execute(Function<Connection, Object> fun);
 
     /**
      * Initializes the {@code DataService}. This might involve establishing connections,
