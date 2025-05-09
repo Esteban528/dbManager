@@ -37,17 +37,13 @@ public class CrudMenu extends Menu {
     this.tableName = DEFAULT_TABLE_NAME;
     this.envManagerService = envManagerService;
 
-    options = new CrudMenuOptions(this, display, menuManager, dataService, tableManagerService, envManagerService);
+    options = new CrudMenuOptions(this, display, menuManager, dataService, tableManagerService);
     loadOptions();
 
   }
 
   private void loadOptions() {
     options.selectTableOption();
-    options.insertOption();
-    options.getDataOption();
-    options.updateOption();
-    options.deleteOption();
   }
 
   public String getTableName() {
@@ -58,6 +54,10 @@ public class CrudMenu extends Menu {
     this.tableName = tableName;
     super.setTitle(String.format("Option for data management  ( %s )", tableName));
   }
+
+  public EnvManagerService getEnvManagerService() {
+    return this.envManagerService;
+  }
 }
 
 class CrudMenuOptions {
@@ -66,22 +66,21 @@ class CrudMenuOptions {
   DataService dataService;
   TableManagerService tableManagerService;
   CrudMenu menu;
-  final EnvManagerService envManagerService;
 
   public CrudMenuOptions(CrudMenu menu, Display display, MenuManager menuManager,
-      DataService dataService, TableManagerService tableManagerService, EnvManagerService envManagerService) {
+      DataService dataService, TableManagerService tableManagerService) {
     this.menu = menu;
     this.display = display;
     this.menuManager = menuManager;
     this.dataService = dataService;
     this.tableManagerService = tableManagerService;
-    this.envManagerService = envManagerService;
   }
 
   public void selectTableOption() {
     menu.addOption(1, "Select a table", () -> {
       try {
         selectTable();
+
       } catch (EmptyValueException e) {
         display.sendErrorLog(e.getMessage());
       } finally {
@@ -201,7 +200,7 @@ class CrudMenuOptions {
   @SuppressWarnings("unchecked")
   public void selectTable() throws EmptyValueException {
 
-    ConnectionBean connectionBean = (ConnectionBean) envManagerService.get("ConnectionBean");
+    ConnectionBean connectionBean = (ConnectionBean) menu.getEnvManagerService().get("ConnectionBean");
     Object tableSetObject = dataService.execute((conn) -> { 
       try {
         DatabaseMetaData md = conn.getMetaData();
@@ -227,6 +226,11 @@ class CrudMenuOptions {
     menu.setTableName(tableName);
     tableManagerService.setTableName(tableName);
     dataService.setTableName(tableName);
+
+    insertOption();
+    getDataOption();
+    updateOption();
+    deleteOption();
   }
 
   void insert(Map<String, String> items) throws EmptyValueException {

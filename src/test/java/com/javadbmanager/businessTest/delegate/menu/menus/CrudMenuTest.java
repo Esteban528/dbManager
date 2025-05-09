@@ -85,6 +85,7 @@ public class CrudMenuTest {
     when(display.scanLine())
         .thenReturn(value);
 
+    crudMenu.executeOption(1);
     crudMenu.executeOption(2);
     verify(dataService).insert(Map.of(column, value));
   }
@@ -103,6 +104,7 @@ public class CrudMenuTest {
     // Result
     when(dataService.get()).thenReturn(List.of(map, map));
 
+    crudMenu.executeOption(1);
     crudMenu.executeOption(3);
     verify(dataService).get();
   }
@@ -122,12 +124,15 @@ public class CrudMenuTest {
     // Result
     when(dataService.get(filter)).thenReturn(List.of(map, map));
 
+    crudMenu.executeOption(1);
     crudMenu.executeOption(3);
     verify(dataService).get(filter);
   }
 
   @Test
   void updateTest() throws BusinessException {
+
+    crudMenu.executeOption(1);
     String column = "name";
     String value = "Carlos";
     Map<String, String> map = Map.of(column, value);
@@ -151,6 +156,7 @@ public class CrudMenuTest {
     when(display.scanLine())
         .thenReturn("id=6");
 
+    crudMenu.executeOption(1);
     crudMenu.executeOption(5);
     verify(dataService).delete(filter);
   }
