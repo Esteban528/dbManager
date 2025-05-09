@@ -64,14 +64,14 @@ public class MenuManagerImpl implements MenuManager {
         display.sendLog("0. Main menu");
       options.keySet().forEach(key -> {
         CommandHandler commandHandler = options.get(key);
-        display.sendLog(String.format("%d. %s", key, commandHandler.getTitle()));
+        display.sendLog(String.format("%d. \u001B[38;5;208m%s\u001B[0m", key, commandHandler.getTitle()));
       });
 
       try {
         display.sendLog("Select an option. (Only number)");
 
         int option = display.scan();
-        display.sendLog("You've been select " + option);
+        display.sendLog("Selected: " + String.format("\u001B[38;5;208m%s\u001B[0m\n", option));
 
         if (option == 0)
           load(MenuType.MainMenu);
