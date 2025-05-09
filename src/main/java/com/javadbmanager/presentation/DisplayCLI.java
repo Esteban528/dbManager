@@ -37,7 +37,7 @@ public class DisplayCLI implements Display {
 
   @Override
   public void sendSuccessLog(String log) {
-    sendLog(String.format("\u001B[31m%s\u001B[0m\n", log), 2);
+    sendLog(String.format("\u001B[32m%s\u001B[0m\n", log), 2);
   }
 
   public void sendLog(String log) {
