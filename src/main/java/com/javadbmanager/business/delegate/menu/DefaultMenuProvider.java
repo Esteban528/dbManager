@@ -28,7 +28,7 @@ public class DefaultMenuProvider implements MenuProvider {
     Menu settingMenu = new SettingMenu(display, menuManager, connectionBeanBuilder, new ConnectionUtil(),
         envManagerService);
     Menu tableEditorMenu = new TableEditorMenu(display, menuManager, tableManagerService);
-    Menu crudMenu = new CrudMenu(display, menuManager, dataService, tableManagerService);
+    Menu crudMenu = new CrudMenu(display, menuManager, dataService, tableManagerService, envManagerService);
 
     menuList.add(mainMenu);
     menuList.add(settingMenu);

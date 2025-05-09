@@ -17,8 +17,10 @@ import com.javadbmanager.business.delegate.menu.Menu;
 import com.javadbmanager.business.delegate.menu.MenuManagerImpl;
 import com.javadbmanager.business.delegate.menu.menus.CrudMenu;
 import com.javadbmanager.business.logic.DataService;
+import com.javadbmanager.business.logic.EnvManagerService;
 import com.javadbmanager.business.logic.TableManagerService;
 import com.javadbmanager.business.logic.exceptions.BusinessException;
+import com.javadbmanager.data.ConnectionBean;
 import com.javadbmanager.presentation.DisplayCLI;
 
 public class CrudMenuTest {
@@ -34,6 +36,9 @@ public class CrudMenuTest {
 
   @Mock
   TableManagerService tableManagerService;
+
+  @Mock
+  EnvManagerService envManagerService;
 
   @InjectMocks
   CrudMenu crudMenu;
@@ -54,6 +59,7 @@ public class CrudMenuTest {
 
     when(display.scanLine())
         .thenReturn(tableName);
+    when(envManagerService.get("ConnectionBean")).thenReturn(new ConnectionBean());
 
     crudMenu.executeOption(1);
 

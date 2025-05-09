@@ -1,16 +1,23 @@
 package com.javadbmanager.business.delegate.menu.menus;
 
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.javadbmanager.business.delegate.menu.Menu;
 import com.javadbmanager.business.delegate.menu.MenuManager;
 import com.javadbmanager.business.delegate.menu.MenuType;
 import com.javadbmanager.business.logic.DataService;
+import com.javadbmanager.business.logic.EnvManagerService;
 import com.javadbmanager.business.logic.TableManagerService;
 import com.javadbmanager.business.logic.exceptions.BusinessException;
+import com.javadbmanager.data.ConnectionBean;
 import com.javadbmanager.presentation.Display;
 import com.javadbmanager.presentation.DisplayUtils;
 import com.javadbmanager.presentation.exceptions.EmptyValueException;
@@ -18,16 +25,19 @@ import com.javadbmanager.presentation.exceptions.EmptyValueException;
 public class CrudMenu extends Menu {
   private CrudMenuOptions options;
   private String tableName = null;
+  private final EnvManagerService envManagerService;
   public final static String DEFAULT_TABLE_NAME = "NOT SELECTED";
 
   public CrudMenu(Display display, MenuManager menuManager, DataService dataService,
-      TableManagerService tableManagerService) {
+      TableManagerService tableManagerService, EnvManagerService envManagerService) {
 
     super("Crud Menu", "Option for data management (TABLE NOT SELECTED)", MenuType.CrudManager, display,
         menuManager);
 
     this.tableName = DEFAULT_TABLE_NAME;
-    options = new CrudMenuOptions(this, display, menuManager, dataService, tableManagerService);
+    this.envManagerService = envManagerService;
+
+    options = new CrudMenuOptions(this, display, menuManager, dataService, tableManagerService, envManagerService);
     loadOptions();
 
   }
@@ -56,14 +66,16 @@ class CrudMenuOptions {
   DataService dataService;
   TableManagerService tableManagerService;
   CrudMenu menu;
+  final EnvManagerService envManagerService;
 
   public CrudMenuOptions(CrudMenu menu, Display display, MenuManager menuManager,
-      DataService dataService, TableManagerService tableManagerService) {
+      DataService dataService, TableManagerService tableManagerService, EnvManagerService envManagerService) {
     this.menu = menu;
     this.display = display;
     this.menuManager = menuManager;
     this.dataService = dataService;
     this.tableManagerService = tableManagerService;
+    this.envManagerService = envManagerService;
   }
 
   public void selectTableOption() {
@@ -186,8 +198,30 @@ class CrudMenuOptions {
     display.show();
   }
 
+  @SuppressWarnings("unchecked")
   public void selectTable() throws EmptyValueException {
-    display.sendLog("Enter the table name");
+
+    ConnectionBean connectionBean = (ConnectionBean) envManagerService.get("ConnectionBean");
+    Object tableSetObject = dataService.execute((conn) -> { 
+      try {
+        DatabaseMetaData md = conn.getMetaData();
+
+        ResultSet rs = md.getTables(connectionBean.getDatabase(), null, "%", new String[] {"TABLE"});
+        Set<String> tableSet = new HashSet<>();
+        while (rs.next()) {
+          tableSet.add(rs.getString(3));
+        }
+        return tableSet;
+      } catch(SQLException e) {return null;}
+    });
+
+    display.sendLog("Choose a table name from the following");
+    if (tableSetObject != null) {
+        display.sendLog(((Set<String>) tableSetObject).stream().collect(Collectors.joining(", ")));;
+    }
+
+    display.sendLog("Enter the table name: ");
+
     String tableName = display.scanLine();
     display.sendSuccessLog(tableName);
     menu.setTableName(tableName);
